@@ -1,4 +1,5 @@
 const _ = require('lodash')
+const path = require('path')
 
 module.exports = {
   checkValidFlyntDirectory: function (generator) {
@@ -11,9 +12,16 @@ module.exports = {
   getThemePath: function (generator) {
     // read theme name from .flynt.json
     const config = generator.fs.readJSON(generator.destinationPath('.flynt.json'))
-    if (_.isEmpty(config) || _.isEmpty(config.themeName)) {
-      generator.env.error('Theme name not found in .flynt.json!');
+    if (_.isEmpty(config)) {
+      generator.env.error('Config not found in .flynt.json!');
     }
-    return generator.destinationPath(`web/app/themes/${config.themeName}/`)
+    if (_.isEmpty(config.themeName) || _.isEmpty(config.themePath)) {
+      generator.env.error('Make sure themeName and themePath is defined in .flynt.json!');
+    }
+    if (path.basename(generator.contextRoot) === config.themeName) {
+      return generator.destinationPath(`../${config.themeName}`)
+    }
+
+    return generator.destinationPath(`${config.themePath}/${config.themeName}/`)
   }
 }
